@@ -12,11 +12,12 @@
 	import { HocuspocusProvider } from '@hocuspocus/provider';
 	import { onMount } from 'svelte';
 
-	import { getRandomName, getRandomColor } from '$lib/randomName';
 	import { createButtons } from '$lib/buttons';
 
 	import jsPDF from 'jspdf';
 	import html2canvas from 'html2canvas';
+
+	import { random_name, random_color } from '$lib/globalnamestore';
 
 	let ydoc = new Y.Doc();
 	let element;
@@ -36,16 +37,18 @@
 		}
 	});
 
-	let random_name = getRandomName();
-	let random_color = getRandomColor();
+	//let $random_name = getRandomName();
+	//let $random_color = getRandomColor();
 
 	let mouseX = 0;
 	let mouseY = 0;
 
+	$: document.documentElement.style.setProperty('--primary-color', $random_color);
+
 	function updateAwareness() {
 		provider.setAwarenessField('user', {
-			name: random_name,
-			color: random_color,
+			name: $random_name,
+			color: $random_color,
 			mouseX: m.x,
 			mouseY: m.y
 		});
@@ -63,7 +66,7 @@
 				}),
 				CollaborationCursor.configure({
 					provider,
-					user: { name: random_name, color: random_color }
+					user: { name: $random_name, color: $random_color }
 				}),
 				Highlight.configure({
 					HTMLAttributes: {
@@ -92,22 +95,17 @@
 		const doc = new jsPDF();
 		const content = editor.getHTML();
 
-		// Create a temporary container for the HTML content
 		const tempContainer = document.createElement('div');
 		tempContainer.innerHTML = content;
 		document.body.appendChild(tempContainer);
 
-		// Use html2canvas to render the HTML content to a canvas
 		const canvas = await html2canvas(tempContainer);
 
-		// Add the canvas image to the PDF
 		const imgData = canvas.toDataURL('image/png');
 		doc.addImage(imgData, 'PNG', 10, 10, 190, (canvas.height * 190) / canvas.width);
 
-		// Clean up the temporary container
 		document.body.removeChild(tempContainer);
 
-		// Save the generated PDF
 		doc.save('document.pdf');
 	}
 </script>
@@ -121,23 +119,6 @@
 			updateAwareness();
 		}}
 	>
-		<div>
-			<div class="input-container">
-				<input
-					type="text"
-					class="custom-input"
-					bind:value={random_name}
-					on:change={updateAwareness}
-				/>
-				<input
-					type="color"
-					class="custom-input"
-					bind:value={random_color}
-					on:change={updateAwareness}
-				/>
-			</div>
-		</div>
-
 		{#if editor}
 			<div class="overflow-auto">
 				<div class="button-group">
@@ -161,7 +142,7 @@
 		{#each awarenessState as item}
 			<!-- content here -->
 			<!-- {JSON.stringify(item.user.mouseX)} <br /> -->
-			{#if item.user.name != random_name}
+			{#if item.user.name != $random_name}
 				<div
 					class="mousepointer"
 					style="--left: {item.user.mouseX}px;--top: {item.user.mouseY}px;--cursor-color: {item.user
@@ -171,13 +152,33 @@
 		{/each}
 		<!-- {JSON.stringify(awarenessState)} -->
 	</div>
+	<br />
 
-	{#if editor}
+	<div class="grid">
+		{#if editor}
+			<div>
+				<div id="editor"></div>
+				<button on:click={convertToPDF}>Download PDF</button>
+			</div>
+		{/if}
+
 		<div>
-			<div id="editor"></div>
-			<button on:click={convertToPDF}>Download as PDF</button>
+			<div class="input-container">
+				<input
+					type="text"
+					class="custom-input"
+					bind:value={$random_name}
+					on:change={updateAwareness}
+				/>
+				<input
+					type="color"
+					class="custom-input"
+					bind:value={$random_color}
+					on:change={updateAwareness}
+				/>
+			</div>
 		</div>
-	{/if}
+	</div>
 </main>
 
 <style>
@@ -185,6 +186,7 @@
 		border: 1px solid #ddd;
 		border-radius: 5px;
 	}
+
 	.mousepointer {
 		position: absolute;
 		background: var(--cursor-color);
