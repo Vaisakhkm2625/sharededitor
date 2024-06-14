@@ -13,10 +13,15 @@
 	import { onMount } from 'svelte';
 
 	import { getRandomName, getRandomColor } from '$lib/randomName';
+	import { createButtons } from '$lib/buttons';
+
+	import jsPDF from 'jspdf';
+	import html2canvas from 'html2canvas';
 
 	let ydoc = new Y.Doc();
 	let element;
 	let editor;
+	let buttons;
 
 	let m = { x: 0, y: 0 };
 	let awarenessState = [];
@@ -76,203 +81,104 @@
 				editor = editor;
 			}
 		});
+		buttons = createButtons(editor);
 	});
 
-	//	const buttons = [
-	//		{
-	//			name: 'italics',
-	//			icon: 'fa-solid fa-italic',
-	//			command: () => editor.chain().focus().toggleItalic().run()
-	//		},
-	//		{
-	//			name: 'bold',
-	//			icon: 'fa-solid fa-bold',
-	//			command: () => editor.chain().focus().toggleBold().run()
-	//		}
-	//	];
+	function getEditorContent() {
+		return editor.getHTML();
+	}
 
-	const buttons = [
-		{
-			name: 'bold',
-			icon: 'fa-solid fa-bold',
-			command: () => editor.chain().focus().toggleBold().run(),
-			disabled: () => !editor.can().chain().focus().toggleBold().run(),
-			isActive: () => editor.isActive('bold')
-		},
-		{
-			name: 'italic',
-			icon: 'fa-solid fa-italic',
-			command: () => editor.chain().focus().toggleItalic().run(),
-			disabled: () => !editor.can().chain().focus().toggleItalic().run(),
-			isActive: () => editor.isActive('italic')
-		},
-		{
-			name: 'strike',
-			icon: 'fa-solid fa-strikethrough',
-			command: () => editor.chain().focus().toggleStrike().run(),
-			disabled: () => !editor.can().chain().focus().toggleStrike().run(),
-			isActive: () => editor.isActive('strike')
-		},
-		{
-			name: 'code',
-			icon: 'fa-solid fa-code',
-			command: () => editor.chain().focus().toggleCode().run(),
-			disabled: () => !editor.can().chain().focus().toggleCode().run(),
-			isActive: () => editor.isActive('code')
-		},
-		{
-			name: 'clear marks',
-			icon: 'fa-solid fa-eraser',
-			command: () => editor.chain().focus().unsetAllMarks().run()
-		},
-		{
-			name: 'clear nodes',
-			icon: 'fa-solid fa-ban',
-			command: () => editor.chain().focus().clearNodes().run()
-		},
-		{
-			name: 'paragraph',
-			icon: 'fa-solid fa-paragraph',
-			command: () => editor.chain().focus().setParagraph().run(),
-			isActive: () => editor.isActive('paragraph')
-		},
-		{
-			name: 'h1',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-			isActive: () => editor.isActive('heading', { level: 1 })
-		},
-		{
-			name: 'h2',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-			isActive: () => editor.isActive('heading', { level: 2 })
-		},
-		{
-			name: 'h3',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-			isActive: () => editor.isActive('heading', { level: 3 })
-		},
-		{
-			name: 'h4',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 4 }).run(),
-			isActive: () => editor.isActive('heading', { level: 4 })
-		},
-		{
-			name: 'h5',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 5 }).run(),
-			isActive: () => editor.isActive('heading', { level: 5 })
-		},
-		{
-			name: 'h6',
-			icon: 'fa-solid fa-heading',
-			command: () => editor.chain().focus().toggleHeading({ level: 6 }).run(),
-			isActive: () => editor.isActive('heading', { level: 6 })
-		},
-		{
-			name: 'bullet list',
-			icon: 'fa-solid fa-list-ul',
-			command: () => editor.chain().focus().toggleBulletList().run(),
-			isActive: () => editor.isActive('bulletList')
-		},
-		{
-			name: 'ordered list',
-			icon: 'fa-solid fa-list-ol',
-			command: () => editor.chain().focus().toggleOrderedList().run(),
-			isActive: () => editor.isActive('orderedList')
-		},
-		{
-			name: 'code block',
-			icon: 'fa-solid fa-code',
-			command: () => editor.chain().focus().toggleCodeBlock().run(),
-			isActive: () => editor.isActive('codeBlock')
-		},
-		{
-			name: 'blockquote',
-			icon: 'fa-solid fa-quote-right',
-			command: () => editor.chain().focus().toggleBlockquote().run(),
-			isActive: () => editor.isActive('blockquote')
-		},
-		{
-			name: 'horizontal rule',
-			icon: 'fa-solid fa-minus',
-			command: () => editor.chain().focus().setHorizontalRule().run()
-		},
-		{
-			name: 'hard break',
-			icon: 'fa-solid fa-arrow-down',
-			command: () => editor.chain().focus().setHardBreak().run()
-		},
-		{
-			name: 'undo',
-			icon: 'fa-solid fa-undo',
-			command: () => editor.chain().focus().undo().run(),
-			disabled: () => !editor.can().chain().focus().undo().run()
-		},
-		{
-			name: 'redo',
-			icon: 'fa-solid fa-redo',
-			command: () => editor.chain().focus().redo().run(),
-			disabled: () => !editor.can().chain().focus().redo().run()
-		},
-		{
-			name: 'set color',
-			icon: 'fa-solid fa-palette',
-			command: () => editor.chain().focus().setColor('#958DF1').run(),
-			isActive: () => editor.isActive('textStyle', { color: '#958DF1' })
-		},
-		{
-			name: 'purple',
-			icon: 'fa-solid fa-palette',
-			command: () => editor.commands.setHighlight(),
-			isActive: () => editor.isActive('textStyle', { color: '#958DF1' })
-		}
-	];
+	async function convertToPDF() {
+		const doc = new jsPDF();
+		const content = editor.getHTML();
+
+		// Create a temporary container for the HTML content
+		const tempContainer = document.createElement('div');
+		tempContainer.innerHTML = content;
+		document.body.appendChild(tempContainer);
+
+		// Use html2canvas to render the HTML content to a canvas
+		const canvas = await html2canvas(tempContainer);
+
+		// Add the canvas image to the PDF
+		const imgData = canvas.toDataURL('image/png');
+		doc.addImage(imgData, 'PNG', 10, 10, 190, (canvas.height * 190) / canvas.width);
+
+		// Clean up the temporary container
+		document.body.removeChild(tempContainer);
+
+		// Save the generated PDF
+		doc.save('document.pdf');
+	}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div
-	on:mousemove={(e) => {
-		m = { x: e.pageX, y: e.pageY };
-		console.log(e);
-		updateAwareness();
-	}}
->
-	<h1 style="text-align: center;">Collab Edit</h1>
+<main class="container">
+	<div
+		on:mousemove={(e) => {
+			m = { x: e.pageX, y: e.pageY };
+			console.log(e);
+			updateAwareness();
+		}}
+	>
+		<div>
+			<div class="input-container">
+				<input
+					type="text"
+					class="custom-input"
+					bind:value={random_name}
+					on:change={updateAwareness}
+				/>
+				<input
+					type="color"
+					class="custom-input"
+					bind:value={random_color}
+					on:change={updateAwareness}
+				/>
+			</div>
+		</div>
 
-	<div>
-		<input type="text" bind:value={random_name} on:change={updateAwareness} />
-		<input type="color" bind:value={random_color} on:change={updateAwareness} />
+		{#if editor}
+			<div class="overflow-auto">
+				<div class="button-group">
+					{#each [1, 2, 3, 4, 5] as g}
+						<div role="group">
+							{#each buttons.filter((button) => button.group === 'group' + g) as button}
+								<button title={button.name} on:click={button.command} class="menu-buttons">
+									<i class={button.icon}
+										>{#if button.icon.includes('custom-icon')}<span>{button.name}</span>{/if}</i
+									>
+								</button>
+							{/each}
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<div bind:this={element} />
+
+		{#each awarenessState as item}
+			<!-- content here -->
+			<!-- {JSON.stringify(item.user.mouseX)} <br /> -->
+			{#if item.user.name != random_name}
+				<div
+					class="mousepointer"
+					style="--left: {item.user.mouseX}px;--top: {item.user.mouseY}px;--cursor-color: {item.user
+						.color};"
+				/>
+			{/if}
+		{/each}
+		<!-- {JSON.stringify(awarenessState)} -->
 	</div>
 
 	{#if editor}
-		<br />
-		{#each buttons as button}
-			<button title={button.name} on:click={button.command}>
-				<i class={button.icon}></i>
-			</button>
-		{/each}
-		<br />
+		<div>
+			<div id="editor"></div>
+			<button on:click={convertToPDF}>Download as PDF</button>
+		</div>
 	{/if}
-
-	<div bind:this={element} />
-
-	{#each awarenessState as item}
-		<!-- content here -->
-		<!-- {JSON.stringify(item.user.mouseX)} <br /> -->
-		{#if item.user.name != random_name}
-			<div
-				class="mousepointer"
-				style="--left: {item.user.mouseX}px;--top: {item.user.mouseY}px;--cursor-color: {item.user
-					.color};"
-			/>
-		{/if}
-	{/each}
-	<!-- {JSON.stringify(awarenessState)} -->
-</div>
+</main>
 
 <style>
 	:global(.ProseMirror) {
@@ -287,5 +193,47 @@
 		border-radius: 0% 50% 50% 50%;
 		left: var(--left);
 		top: var(--top);
+	}
+
+	.custom-input {
+		width: auto;
+		min-width: 50px;
+		padding: 0.5rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		font-size: 1rem;
+	}
+
+	.input-container {
+		display: flex;
+		justify-content: right;
+		align-items: center;
+	}
+
+	.menu-buttons {
+		--pico-form-element-spacing-vertical: 0.75rem;
+		--pico-form-element-spacing-horizontal: 1rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.custom-icon {
+		display: inline-block;
+		width: 30px;
+		height: 30px;
+		line-height: 30px;
+		text-align: center;
+		border-radius: 5px;
+		/*font-family: Arial, sans-serif;*/
+		font-family: Roboto, sans-serif;
+		font-style: normal;
+
+		font-weight: bold;
+		color: #fff;
+		margin-right: 5px;
 	}
 </style>
