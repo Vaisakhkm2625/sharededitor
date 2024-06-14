@@ -7,7 +7,9 @@
 <header class="container">
 	<nav>
 		<ul>
-			<li><strong>{title}</strong></li>
+			<a href="/" class="logo-link">
+				<li><strong>{title}</strong></li>
+			</a>
 		</ul>
 		<ul>
 			<li>{$random_name}</li>
@@ -21,5 +23,15 @@
 		border-radius: 50%;
 		width: 20px;
 		height: 20px;
+	}
+
+	.logo-link {
+		text-decoration: none;
+		color: inherit; /* Ensures text color remains the same */
+	}
+
+	/* Prevent color change on click */
+	.logo-link:visited {
+		color: inherit; /* Ensures visited link color remains the same */
 	}
 </style>
