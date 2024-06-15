@@ -28,7 +28,7 @@
 	let awarenessState = [];
 
 	let provider = new HocuspocusProvider({
-		url: 'ws://127.0.0.1:1234',
+		url: 'ws://rnyto-103-160-194-120.a.free.pinggy.link:37215',
 		name: data.docid, //document name
 		document: ydoc,
 		onAwarenessUpdate: ({ states }) => {
