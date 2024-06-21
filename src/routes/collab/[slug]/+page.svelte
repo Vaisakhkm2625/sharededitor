@@ -28,7 +28,7 @@
 	let awarenessState = [];
 
 	let provider = new HocuspocusProvider({
-		url: 'ws://127.0.0.1:1234',
+		url: 'http://127.0.0.1:1234',
 		name: data.docid, //document name
 		document: ydoc,
 		onAwarenessUpdate: ({ states }) => {
