@@ -36,6 +36,7 @@
 		"@tiptap/extension-highlight": "^2.4.0",
 		"@tiptap/pm": "^2.4.0",
 		"@tiptap/starter-kit": "^2.4.0",
+		"@vercel/edge": "^1.1.1",
 		"bootstrap": "^5.0.1",
 		"html2canvas": "^1.4.1",
 		"jspdf": "^2.5.1"
