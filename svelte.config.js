@@ -14,13 +14,8 @@ import adapter from '@sveltejs/adapter-vercel';
 
 export default {
     kit: {
-        adapter({
-            images: {
-                sizes: [640, 828, 1200, 1920, 3840],
-        formats: ['image/avif', 'image/webp'],
-        minimumCacheTTL: 300,
-        domains: ['example-app.vercel.app'],
-    }
-})
+        adapter: adapter({
+            // see below for options that can be set here
+        })
     }
 };
